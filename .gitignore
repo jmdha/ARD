@@ -1,0 +1,5 @@
+.cache/clangd/index
+bench
+ard
+compile_commands.json
+test
