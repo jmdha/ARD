@@ -45,17 +45,20 @@ void prox_free(struct prox* prox) {
 	free(prox);
 }
 
+bool inside(int x, int y, int w, int h) {
+	return x >= 0 &&
+	       y >= 0 &&
+	       x <  w &&
+	       y <  h;
+}
+
 uint32_t count(struct prox* prox, int x, int y, int xv, int yv) { 
+	const int w = prox_width(prox);
+	const int h = prox_height(prox);
 	uint32_t v = 0;
 	x += xv;
 	y += yv;
-	while (
-		x >= 0 &&
-		y >= 0 &&
-		x < prox_width(prox) &&
-		y < prox_height(prox) &&
-		prox_active(prox, x, y)
-	) {
+	while (inside(x, y, w, h) && prox_active(prox, x, y)) {
 		v += 1;
 		x += xv;
 		y += yv;
