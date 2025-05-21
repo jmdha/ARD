@@ -3,27 +3,24 @@
 #include <stdlib.h>
 
 #include "prox.h"
+#include "grid.h"
 
 struct prox {
-	uint32_t* buf;
-	int       width;
-	int       height;
+	struct grid* buf;
 };
 
 struct prox* prox_init(int w, int h) {
 	struct prox* prox = malloc(sizeof(struct prox));
-	prox->buf         = calloc(w * h, sizeof(uint32_t));
-	prox->width       = w;
-	prox->height      = h;
+	prox->buf         = grid_init(w, h);
 	return prox;
 }
 
 int prox_width(const struct prox* prox) {
-	return prox->width;
+	return grid_width(prox->buf);
 }
 
 int prox_height(const struct prox* prox) {
-	return prox->height;
+	return grid_height(prox->buf);
 }
 
 uint32_t prox_max(const struct prox* prox) {
@@ -36,16 +33,20 @@ uint32_t prox_max(const struct prox* prox) {
 }
 
 uint32_t prox_get(const struct prox* prox, int x, int y) {
-	return prox->buf[y * prox_width(prox) + x] & (~(1 << 31));
+	return grid_get(prox->buf, x, y) & (~(1 << 31));
 }
 
 bool prox_active(const struct prox* prox, int x, int y) {
-	return (prox->buf[y * prox_width(prox) + x] & (1 << 31)) != 0;
+	return (grid_get(prox->buf, x, y) & (1 << 31)) != 0;
 }
 
 void prox_free(struct prox* prox) {
-	free(prox->buf);
+	grid_free(prox->buf);
 	free(prox);
+}
+
+void prox_resize(struct prox* prox, int w, int h) {
+	grid_resize(prox->buf, w, h);
 }
 
 bool inside(int x, int y, int w, int h) {
@@ -74,6 +75,9 @@ uint32_t count(struct prox* prox, int x, int y, int xv, int yv) {
 }
 
 void prox_set(struct prox* prox, const int X, const int Y) {
+	if (prox_active(prox, X, Y))
+		return;
+
 	const int      w = prox_width(prox);
 	const int      h = prox_height(prox);
 	const uint32_t r = count(prox, X, Y,  1,  0);
@@ -81,22 +85,25 @@ void prox_set(struct prox* prox, const int X, const int Y) {
 	const uint32_t u = count(prox, X, Y,  0,  1);
 	const uint32_t d = count(prox, X, Y,  0, -1);
 
-	prox->buf[Y * w + X] = (1 << 31) | (u + d + r + l);
+	grid_set(prox->buf, X, Y, (1 << 31) | (u + d + r + l));
 
 	for (int x = X + 1; x <  w && prox_active(prox, x, Y); x++)
-		prox->buf[Y * w + x] = prox->buf[Y * w + x] + l + 1;
+		grid_set(prox->buf, x, Y, grid_get(prox->buf, x, Y) + l + 1);
 
 	for (int x = X - 1; x >= 0 && prox_active(prox, x, Y); x--)
-		prox->buf[Y * w + x] = prox->buf[Y * w + x] + r + 1;
+		grid_set(prox->buf, x, Y, grid_get(prox->buf, x, Y) + r + 1);
 
 	for (int y = Y + 1; y <  h && prox_active(prox, X, y); y++)
-		prox->buf[y * w + X] = prox->buf[y * w + X] + d + 1;
+		grid_set(prox->buf, X, y, grid_get(prox->buf, X, y) + d + 1);
 
 	for (int y = Y - 1; y >= 0 && prox_active(prox, X, y); y--)
-		prox->buf[y * w + X] = prox->buf[y * w + X] + u + 1;
+		grid_set(prox->buf, X, y, grid_get(prox->buf, X, y) + u + 1);
 }
 
 void prox_unset(struct prox* prox, const int X, const int Y) {
+	if (!prox_active(prox, X, Y))
+		return;
+
 	const int      w = prox_width(prox);
 	const int      h = prox_height(prox);
 	const uint32_t r = count(prox, X, Y,  1,  0);
@@ -104,17 +111,17 @@ void prox_unset(struct prox* prox, const int X, const int Y) {
 	const uint32_t u = count(prox, X, Y,  0,  1);
 	const uint32_t d = count(prox, X, Y,  0, -1);
 
-	prox->buf[Y * w + X] = 0;
+	grid_set(prox->buf, X, Y, 0);
 
 	for (int x = X + 1; x <  w && prox_active(prox, x, Y); x++)
-		prox->buf[Y * w + x] = prox->buf[Y * w + x] - l - 1;
+		grid_set(prox->buf, x, Y, grid_get(prox->buf, x, Y) - l - 1);
 
 	for (int x = X - 1; x >= 0 && prox_active(prox, x, Y); x--)
-		prox->buf[Y * w + x] = prox->buf[Y * w + x] - r - 1;
+		grid_set(prox->buf, x, Y, grid_get(prox->buf, x, Y) - r - 1);
 
 	for (int y = Y + 1; y <  h && prox_active(prox, X, y); y++)
-		prox->buf[y * w + X] = prox->buf[y * w + X] - d - 1;
+		grid_set(prox->buf, X, y, grid_get(prox->buf, X, y) - d - 1);
 
 	for (int y = Y - 1; y >= 0 && prox_active(prox, X, y); y--)
-		prox->buf[y * w + X] = prox->buf[y * w + X] - u - 1;
+		grid_set(prox->buf, X, y, grid_get(prox->buf, X, y) - u - 1);
 }
