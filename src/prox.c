@@ -29,7 +29,7 @@ int prox_height(const struct prox* prox) {
 uint32_t prox_max(const struct prox* prox) {
 	uint32_t max = 0;
 	for (int x = 0; x < prox_width(prox); x++)
-		for (int y = 0; y < prox_width(prox); y++)
+		for (int y = 0; y < prox_height(prox); y++)
 			if (prox_get(prox, x, y) > max)
 				max = prox_get(prox, x, y);
 	return max;
@@ -104,7 +104,7 @@ void prox_unset(struct prox* prox, const int X, const int Y) {
 	const uint32_t u = count(prox, X, Y,  0,  1);
 	const uint32_t d = count(prox, X, Y,  0, -1);
 
-	prox->buf[Y * w + X] = (1 << 31) | (u + d + r + l);
+	prox->buf[Y * w + X] = 0;
 
 	for (int x = X + 1; x <  w && prox_active(prox, x, Y); x++)
 		prox->buf[Y * w + x] = prox->buf[Y * w + x] - l - 1;
