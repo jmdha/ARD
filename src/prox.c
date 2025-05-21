@@ -52,6 +52,10 @@ bool inside(int x, int y, int w, int h) {
 	       y <  h;
 }
 
+// TODO: Replace count with a directional function.
+// The way it currently works, 3/4 of the work it is doing is wasted.
+// Namely checking whether it is outside the bounds of directions
+// it is not going.
 uint32_t count(struct prox* prox, int x, int y, int xv, int yv) { 
 	const int w = prox_width(prox);
 	const int h = prox_height(prox);
@@ -66,25 +70,48 @@ uint32_t count(struct prox* prox, int x, int y, int xv, int yv) {
 	return v;
 }
 
-void prox_set(struct prox* prox, int x, int y) {
+void prox_set(struct prox* prox, const int X, const int Y) {
 	const int      w = prox_width(prox);
 	const int      h = prox_height(prox);
-	const uint32_t r = count(prox, x, y,  1,  0);
-	const uint32_t l = count(prox, x, y, -1,  0);
-	const uint32_t u = count(prox, x, y,  0,  1);
-	const uint32_t d = count(prox, x, y,  0, -1);
+	const uint32_t r = count(prox, X, Y,  1,  0);
+	const uint32_t l = count(prox, X, Y, -1,  0);
+	const uint32_t u = count(prox, X, Y,  0,  1);
+	const uint32_t d = count(prox, X, Y,  0, -1);
 
-	prox->buf[y * w + x] = (1 << 31) | (u + d + r + l);
+	prox->buf[Y * w + X] = (1 << 31) | (u + d + r + l);
 
-	for (int m = 1; x + m <  w && prox_active(prox, x + m, y); m++)
-		prox->buf[y * w + (x + m)] = prox->buf[y * w + (x + m)] + l + 1;
+	for (int x = X + 1; x <  w && prox_active(prox, x, Y); x++)
+		prox->buf[Y * w + x] = prox->buf[Y * w + x] + l + 1;
 
-	for (int m = 1; x - m >= 0 && prox_active(prox, x - m, y); m++)
-		prox->buf[y * w + (x - m)] = prox->buf[y * w + (x - m)] + r + 1;
+	for (int x = X - 1; x >= 0 && prox_active(prox, x, Y); x--)
+		prox->buf[Y * w + x] = prox->buf[Y * w + x] + r + 1;
 
-	for (int m = 1; y + m <  h && prox_active(prox, x, y + m); m++)
-		prox->buf[(y + m) * w + x] = prox->buf[(y + m) * w + x] + d + 1;
+	for (int y = Y + 1; y <  h && prox_active(prox, X, y); y++)
+		prox->buf[y * w + X] = prox->buf[y * w + X] + d + 1;
 
-	for (int m = 1; y - m >= 0 && prox_active(prox, x, y - m); m++)
-		prox->buf[(y - m) * w + x] = prox->buf[(y - m) * w + x] + u + 1;
+	for (int y = Y - 1; y >= 0 && prox_active(prox, X, y); y--)
+		prox->buf[y * w + X] = prox->buf[y * w + X] + u + 1;
+}
+
+void prox_unset(struct prox* prox, const int X, const int Y) {
+	const int      w = prox_width(prox);
+	const int      h = prox_height(prox);
+	const uint32_t r = count(prox, X, Y,  1,  0);
+	const uint32_t l = count(prox, X, Y, -1,  0);
+	const uint32_t u = count(prox, X, Y,  0,  1);
+	const uint32_t d = count(prox, X, Y,  0, -1);
+
+	prox->buf[Y * w + X] = (1 << 31) | (u + d + r + l);
+
+	for (int x = X + 1; x <  w && prox_active(prox, x, Y); x++)
+		prox->buf[Y * w + x] = prox->buf[Y * w + x] - l - 1;
+
+	for (int x = X - 1; x >= 0 && prox_active(prox, x, Y); x--)
+		prox->buf[Y * w + x] = prox->buf[Y * w + x] - r - 1;
+
+	for (int y = Y + 1; y <  h && prox_active(prox, X, y); y++)
+		prox->buf[y * w + X] = prox->buf[y * w + X] - d - 1;
+
+	for (int y = Y - 1; y >= 0 && prox_active(prox, X, y); y--)
+		prox->buf[y * w + X] = prox->buf[y * w + X] - u - 1;
 }

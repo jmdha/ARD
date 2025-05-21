@@ -12,7 +12,7 @@ UTEST(prox, empty) {
 	prox_free(prox);
 }
 
-UTEST(prox, single) {
+UTEST(prox, set_single) {
 	struct prox* prox = prox_init(1, 1);
 	prox_set(prox, 0, 0);
 	ASSERT_TRUE(prox_active(prox, 0, 0));
@@ -20,7 +20,7 @@ UTEST(prox, single) {
 	prox_free(prox);
 }
 
-UTEST(prox, north_south) {
+UTEST(prox, set_north_south) {
 	struct prox* prox = prox_init(1, 2);
 	prox_set(prox, 0, 0);
 	prox_set(prox, 0, 1);
@@ -29,7 +29,7 @@ UTEST(prox, north_south) {
 	prox_free(prox);
 }
 
-UTEST(prox, south_north) {
+UTEST(prox, set_south_north) {
 	struct prox* prox = prox_init(1, 2);
 	prox_set(prox, 0, 1);
 	prox_set(prox, 0, 0);
@@ -38,7 +38,7 @@ UTEST(prox, south_north) {
 	prox_free(prox);
 }
 
-UTEST(prox, east_west) {
+UTEST(prox, set_east_west) {
 	struct prox* prox = prox_init(2, 1);
 	prox_set(prox, 0, 0);
 	prox_set(prox, 1, 0);
@@ -47,7 +47,7 @@ UTEST(prox, east_west) {
 	prox_free(prox);
 }
 
-UTEST(prox, west_east) {
+UTEST(prox, set_west_east) {
 	struct prox* prox = prox_init(2, 1);
 	prox_set(prox, 0, 0);
 	prox_set(prox, 1, 0);
@@ -56,7 +56,7 @@ UTEST(prox, west_east) {
 	prox_free(prox);
 }
 
-UTEST(prox, hor) {
+UTEST(prox, set_hor) {
 	struct prox* prox = prox_init(3, 1);
 	prox_set(prox, 0, 0);
 	prox_set(prox, 2, 0);
@@ -69,7 +69,7 @@ UTEST(prox, hor) {
 	prox_free(prox);
 }
 
-UTEST(prox, ver) {
+UTEST(prox, set_ver) {
 	struct prox* prox = prox_init(1, 3);
 	prox_set(prox, 0, 0);
 	prox_set(prox, 0, 2);
@@ -82,7 +82,7 @@ UTEST(prox, ver) {
 	prox_free(prox);
 }
 
-UTEST(prox, mix) {
+UTEST(prox, set_mix) {
 	struct prox* prox = prox_init(3, 3);
 	prox_set(prox, 1, 0);
 	prox_set(prox, 1, 2);
