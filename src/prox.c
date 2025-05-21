@@ -6,7 +6,6 @@
 
 struct prox {
 	uint32_t* buf;
-	uint32_t  max;
 	int       width;
 	int       height;
 };
@@ -14,7 +13,6 @@ struct prox {
 struct prox* prox_init(int w, int h) {
 	struct prox* prox = malloc(sizeof(struct prox));
 	prox->buf         = calloc(w * h, sizeof(uint32_t));
-	prox->max         = 0;
 	prox->width       = w;
 	prox->height      = h;
 	return prox;
@@ -29,7 +27,12 @@ int prox_height(const struct prox* prox) {
 }
 
 uint32_t prox_max(const struct prox* prox) {
-	return prox->max;
+	uint32_t max = 0;
+	for (int x = 0; x < prox_width(prox); x++)
+		for (int y = 0; y < prox_width(prox); y++)
+			if (prox_get(prox, x, y) > max)
+				max = prox_get(prox, x, y);
+	return max;
 }
 
 uint32_t prox_get(const struct prox* prox, int x, int y) {
