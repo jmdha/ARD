@@ -40,7 +40,6 @@ void grid_resize(struct grid *grid, int w, int h) {
 	for (int x = 0; x < min(grid->width, w); x++)
 		for (int y = 0; y < min(grid->height, h); y++)
 			tmp[y * w + x] = grid->buffer[y * grid->width + x];
-	
 	free(grid->buffer);
 	grid->buffer = tmp;
 	grid->width = w;
