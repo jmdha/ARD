@@ -1,9 +1,13 @@
+#include <limits.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "prox.h"
 #include "grid.h"
+#include "misc.h"
 
 struct prox {
 	struct grid* buf;
@@ -49,79 +53,43 @@ void prox_resize(struct prox* prox, int w, int h) {
 	grid_resize(prox->buf, w, h);
 }
 
-bool inside(int x, int y, int w, int h) {
-	return x >= 0 &&
-	       y >= 0 &&
-	       x <  w &&
-	       y <  h;
-}
-
-// TODO: Replace count with a directional function.
-// The way it currently works, 3/4 of the work it is doing is wasted.
-// Namely checking whether it is outside the bounds of directions
-// it is not going.
-uint32_t count(struct prox* prox, int x, int y, int xv, int yv) { 
-	const int w = prox_width(prox);
-	const int h = prox_height(prox);
-	uint32_t v = 0;
-	x += xv;
-	y += yv;
-	while (inside(x, y, w, h) && prox_active(prox, x, y)) {
-		v += 1;
-		x += xv;
-		y += yv;
+uint32_t val(struct prox* prox, int X, int Y, int w, int h) {
+	for (int o = 1; o < INT_MAX; o++)
+	for (int dx = -1; dx <= 1; dx++)
+	for (int dy = -1; dy <= 1; dy++) {
+		int x = X + o * dx;
+		int y = Y + o * dy;
+		if (x < 0 || y < 0 || x >= w || y >= h)
+			continue;
+		if (!prox_active(prox, x, y))
+			return o;
 	}
-	return v;
 }
 
 void prox_set(struct prox* prox, const int X, const int Y) {
 	if (prox_active(prox, X, Y))
 		return;
 
-	const int      w = prox_width(prox);
-	const int      h = prox_height(prox);
-	const uint32_t r = count(prox, X, Y,  1,  0);
-	const uint32_t l = count(prox, X, Y, -1,  0);
-	const uint32_t u = count(prox, X, Y,  0,  1);
-	const uint32_t d = count(prox, X, Y,  0, -1);
+	const int w = prox_width(prox);
+	const int h = prox_height(prox);
 
-	grid_set(prox->buf, X, Y, (1 << 31) | (u + d + r + l));
+	grid_set(prox->buf, X, Y, (1 << 31) | val(prox, X, Y, w, h));
 
-	for (int x = X + 1; x <  w && prox_active(prox, x, Y); x++)
-		grid_set(prox->buf, x, Y, grid_get(prox->buf, x, Y) + l + 1);
-
-	for (int x = X - 1; x >= 0 && prox_active(prox, x, Y); x--)
-		grid_set(prox->buf, x, Y, grid_get(prox->buf, x, Y) + r + 1);
-
-	for (int y = Y + 1; y <  h && prox_active(prox, X, y); y++)
-		grid_set(prox->buf, X, y, grid_get(prox->buf, X, y) + d + 1);
-
-	for (int y = Y - 1; y >= 0 && prox_active(prox, X, y); y--)
-		grid_set(prox->buf, X, y, grid_get(prox->buf, X, y) + u + 1);
+	for (int o = 1; o < INT_MAX; o++)
+	for (int dx = -1; dx <= 1; dx++)
+	for (int dy = -1; dy <= 1; dy++) {
+		int x = X + o * dx;
+		int y = Y + o * dy;
+		if (x < 0 || y < 0 || x >= w || y >= h)
+			return;
+		if (prox_active(prox, x, y))
+			grid_set(prox->buf, x, y, (1 << 31) | val(prox, x, y, w, h));
+	}
 }
 
 void prox_unset(struct prox* prox, const int X, const int Y) {
-	if (!prox_active(prox, X, Y))
-		return;
-
-	const int      w = prox_width(prox);
-	const int      h = prox_height(prox);
-	const uint32_t r = count(prox, X, Y,  1,  0);
-	const uint32_t l = count(prox, X, Y, -1,  0);
-	const uint32_t u = count(prox, X, Y,  0,  1);
-	const uint32_t d = count(prox, X, Y,  0, -1);
-
-	grid_set(prox->buf, X, Y, 0);
-
-	for (int x = X + 1; x <  w && prox_active(prox, x, Y); x++)
-		grid_set(prox->buf, x, Y, grid_get(prox->buf, x, Y) - l - 1);
-
-	for (int x = X - 1; x >= 0 && prox_active(prox, x, Y); x--)
-		grid_set(prox->buf, x, Y, grid_get(prox->buf, x, Y) - r - 1);
-
-	for (int y = Y + 1; y <  h && prox_active(prox, X, y); y++)
-		grid_set(prox->buf, X, y, grid_get(prox->buf, X, y) - d - 1);
-
-	for (int y = Y - 1; y >= 0 && prox_active(prox, X, y); y--)
-		grid_set(prox->buf, X, y, grid_get(prox->buf, X, y) - u - 1);
+	(void) prox;
+	(void) X;
+	(void) Y;
+	exit(1);
 }
