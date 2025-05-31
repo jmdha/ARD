@@ -31,6 +31,15 @@ int grid_height(const struct grid *grid) {
 	return grid->height;
 }
 
+uint32_t grid_count (const struct grid* grid) {
+	uint32_t v = 0;
+	for (int x = 0; x < grid_width(grid); x++)
+		for (int y = 0; y < grid_height(grid); y++)
+			if (grid_get(grid, x, y) != 0)
+				v++;
+	return v;
+}
+
 uint32_t grid_get(const struct grid *grid, int x, int y) {
 	return grid->buffer[y * grid_width(grid) + x]; 
 }

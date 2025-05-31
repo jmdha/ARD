@@ -36,6 +36,15 @@ uint32_t prox_max(const struct prox* prox) {
 	return max;
 }
 
+uint32_t prox_count (const struct prox* prox) {
+	uint32_t v = 0;
+	for (int x = 0; x < prox_width(prox); x++)
+		for (int y = 0; y < prox_height(prox); y++)
+			if (prox_active(prox, x, y))
+				v++;
+	return v;
+}
+
 uint32_t prox_get(const struct prox* prox, int x, int y) {
 	return grid_get(prox->buf, x, y) & (~(1 << 31));
 }

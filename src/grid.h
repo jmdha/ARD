@@ -10,6 +10,7 @@ void         grid_free(struct grid* grid);
 
 int          grid_width (const struct grid* grid);
 int          grid_height(const struct grid* grid);
+uint32_t     grid_count (const struct grid* grid);
 uint32_t     grid_get   (const struct grid* grid, int x, int y);
 
 void         grid_resize(struct grid* grid, int w, int h);
