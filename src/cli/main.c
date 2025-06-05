@@ -20,6 +20,7 @@ int save_img(const char* name, const struct grid* grid, uint w, uint h, bool inv
 }
 
 int main(int argc, char** argv) {
+	stbi_write_png_compression_level = 0;
 	int w, h, n;
 	unsigned char* img_buf = stbi_load(argv[1], &w, &h, &n, 1);
 	if (!img_buf) {
