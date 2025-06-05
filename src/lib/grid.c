@@ -12,7 +12,7 @@ struct grid {
 
 struct grid *grid_init(int w, int h) {
 	struct grid* grid = malloc(sizeof(struct grid));
-	grid->buffer      = calloc(w * h, sizeof(uint32_t));
+	grid->buffer      = calloc(w * h, sizeof(uint));
 	grid->width       = w;
 	grid->height      = h;
 	return grid;
@@ -31,7 +31,7 @@ int grid_height(const struct grid *grid) {
 	return grid->height;
 }
 
-uint32_t grid_count (const struct grid* grid) {
+uint grid_count (const struct grid* grid) {
 	uint32_t v = 0;
 	for (int x = 0; x < grid_width(grid); x++)
 		for (int y = 0; y < grid_height(grid); y++)
@@ -40,12 +40,21 @@ uint32_t grid_count (const struct grid* grid) {
 	return v;
 }
 
-uint32_t grid_get(const struct grid *grid, int x, int y) {
+uint grid_get(const struct grid *grid, int x, int y) {
 	return grid->buffer[y * grid_width(grid) + x]; 
 }
 
+uint grid_max(const struct grid* grid) {
+	uint m = 0;
+	for (uint x = 0; x < grid_width(grid); x++)
+		for (uint y = 0; y < grid_height(grid); y++)
+			if (grid_get(grid, x, y) > m)
+				m = grid_get(grid, x, y);
+	return m;
+}
+
 void grid_resize(struct grid *grid, int w, int h) {
-	uint32_t* tmp = calloc(w * h, sizeof(uint32_t));
+	uint* tmp = calloc(w * h, sizeof(uint));
 	for (int x = 0; x < min(grid->width, w); x++)
 		for (int y = 0; y < min(grid->height, h); y++)
 			tmp[y * w + x] = grid->buffer[y * grid->width + x];
@@ -65,10 +74,10 @@ void grid_reset(struct grid *grid) {
 	);
 }
 
-void grid_set(struct grid *grid, int x, int y, uint32_t v) {
+void grid_set(struct grid *grid, int x, int y, uint v) {
 	grid->buffer[y * grid_width(grid) + x] = v; 
 }
 
-uint32_t* grid_buf(struct grid* grid) {
+uint* grid_buf(struct grid* grid) {
 	return grid->buffer;
 }

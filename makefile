@@ -2,24 +2,32 @@ PROJECT_NAME   = ard
 PROJECT_AUTHOR = Jan M. D. Hansen
 CC             = gcc
 WFLAGS         = -Wall -Wextra -Wshadow
-CFLAGS         = -Isrc -Ithird_party -O3 -march=native -flto -ggdb
-SRCS           = $(shell find src    -type f -iname '*.c' ! -iname 'main.c')
-BENCHS         = $(shell find benchs -type f -iname '*.c' ! -iname 'main.c')
-TESTS          = $(shell find tests  -type f -iname '*.c' ! -iname 'main.c')
+CFLAGS         = -Isrc -Ithird_party -O0 -march=native -ggdb
+SRC_DIR        = src
+LIB_DIR        = $(SRC_DIR)/lib
+CLI_DIR        = $(SRC_DIR)/cli
+GUI_DIR        = $(SRC_DIR)/gui
 
-.PHONY: all bench test
+SRC_LIB        = $(shell find $(LIB_DIR) -type f -iname '*.c') 
+SRC_CLI        = $(shell find $(CLI_DIR) -type f -iname '*.c') 
+SRC_GUI        = $(shell find $(GUI_DIR) -type f -iname '*.c') 
+SRC_BENCHS     = $(shell find benchs     -type f -iname '*.c') 
+SRC_TESTS      = $(shell find tests      -type f -iname '*.c') 
 
-all:
-	$(CC) $(CFLAGS) $(WFLAGS) $(DEFINE) -o $(PROJECT_NAME) src/main.c    $(SRCS) -lSDL3 -lm
+.PHONY: test bench
+
+all: cli gui
+
+cli:
+	$(CC) $(WFLAGS) $(CFLAGS) -o ardc  $(SRC_LIB) $(SRC_CLI) -lm
+
+gui:
+	$(CC) $(WFLAGS) $(CFLAGS) -o ardg  $(SRC_LIB) $(SRC_GUI) -lSDL3 -lm
 
 bench:
-	$(CC) $(CFLAGS)           $(DEFINE) -o bench           benchs/main.c $(SRCS) $(BENCHS) -lSDL3 -lm
+	$(CC) $(WFLAGS) $(CFLAGS) -o bench $(SRC_LIB) $(SRC_BENCHS) -lm
 	./bench
 
 test:
-	$(CC) $(CFLAGS)           $(DEFINE) -o test            tests/main.c  $(SRCS) $(TESTS)  -lSDL3 -lm
+	$(CC) $(WFLAGS) $(CFLAGS) -o test  $(SRC_LIB) $(SRC_TESTS) -lm
 	./test
-
-
-clean:
-	rm -f $(PROJECT_NAME)
