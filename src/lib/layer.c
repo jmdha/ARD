@@ -102,8 +102,8 @@ void sect_gen(uint* out, const struct cor* cors, uint c, uint w, uint h) {
 		const struct cor* cor = &cors[i];
 		if (out[cor->y * w + cor->x] != 0)
 			continue;
-		for (int ox = -((int)cor->v) + 1; ox < (int) cor->v; ox++)
-			for (int oy = -((int)cor->v) + 1; oy < (int) cor->v; oy++) {
+		for (int ox = -((int)cor->v); ox <= (int) cor->v; ox++)
+			for (int oy = -((int)cor->v); oy <= (int) cor->v; oy++) {
 				const uint x = cor->x + ox;
 				const uint y = cor->y + oy;
 				if (in(w, h, cor->x, cor->y, ox, oy) && !out[y * w + x])
