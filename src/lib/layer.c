@@ -20,16 +20,16 @@ bool in(uint w, uint h, uint x, uint y, int ox, int oy) {
 }
 
 // Checks whether a point offset by i hits unset cell or bounds.
-bool phit(const uint* buf, uint w, uint h, uint x, uint y, uint i) {
+bool phit(const uint* buf, uint w, uint h, uint x0, uint y0, uint i) {
 	for (int mx = -1; mx <= 1; mx++) {
 		for (int my = -1; my <= 1; my++) {
 			const int ox = mx * i;
 			const int oy = my * i;
-			if (!in(w, h, x, y, ox, oy))
+			if (!in(w, h, x0, y0, ox, oy))
 				return true;
-			const uint px = x + ox;
-			const uint py = y + oy;
-			if (buf[py * w + px] == 0)
+			const uint x = x0 + ox;
+			const uint y = y0 + oy;
+			if (buf[y * w + x] == 0)
 				return true;
 		}
 	}
@@ -102,8 +102,8 @@ void sect_gen(uint* out, const struct cor* cors, uint c, uint w, uint h) {
 		const struct cor* cor = &cors[i];
 		if (out[cor->y * w + cor->x] != 0)
 			continue;
-		for (int ox = -((int)cor->v); ox < (int) cor->v; ox++)
-			for (int oy = -((int)cor->v); oy < (int) cor->v; oy++) {
+		for (int ox = -((int)cor->v) + 1; ox < (int) cor->v; ox++)
+			for (int oy = -((int)cor->v) + 1; oy < (int) cor->v; oy++) {
 				const uint x = cor->x + ox;
 				const uint y = cor->y + oy;
 				if (in(w, h, cor->x, cor->y, ox, oy) && !out[y * w + x])

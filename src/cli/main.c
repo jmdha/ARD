@@ -7,15 +7,12 @@
 #include "lib/grid.h"
 #include "lib/layer.h"
 
-int save_img(const char* name, const struct grid* grid, uint w, uint h, bool inverse) {
-	unsigned char* out = malloc(w * h * sizeof(unsigned char));
+int save_img(const char* name, const struct grid* grid, uint w, uint h) {
+	unsigned char* out = calloc(w * h, sizeof(unsigned char));
 	uint m = grid_max(grid);
 	for (uint x = 0; x < (uint) w; x++)
 		for (uint y = 0; y < (uint) h; y++)
-			if (inverse)
-				out[y * w + x] = 255 * (1.0f / ((float) grid_get(grid, x, y) / m));
-			else
-				out[y * w + x] = 255 * ((float) grid_get(grid, x, y) / m);
+			out[y * w + x] = 255 * ((float) grid_get(grid, x, y) / m);
 	stbi_write_png(name, w, h, 1, out, w * sizeof(unsigned char));
 }
 
@@ -33,8 +30,8 @@ int main(int argc, char** argv) {
 			if (img_buf[y * w + x])
 				grid_set(grid, x, y, 1);
 	prox(grid_buf(grid), grid_buf(grid), w, h);
-	save_img("prox.png", grid, w, h, false);
+	save_img("prox.png", grid, w, h);
 	sect(grid_buf(grid), grid_buf(grid), w, h);
-	save_img("sect.png", grid, w, h, true);
+	save_img("sect.png", grid, w, h);
 	stbi_image_free(img_buf);
 }
