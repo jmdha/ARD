@@ -100,16 +100,17 @@ void sect_gen(uint* out, const struct cor* cors, uint c, uint w, uint h) {
 	uint s = 1;
 	for (uint i = 0; i < c; i++) {
 		const struct cor* cor = &cors[i];
-		if (out[cor->y * w + cor->x] != 0)
-			continue;
+		const bool novel = out[cor->y * w + cor->x] == 0;
+		const uint val = novel ? s : out[cor->y * w + cor->x];
 		for (int ox = -((int)cor->v); ox <= (int) cor->v; ox++)
 			for (int oy = -((int)cor->v); oy <= (int) cor->v; oy++) {
 				const uint x = cor->x + ox;
 				const uint y = cor->y + oy;
 				if (in(w, h, cor->x, cor->y, ox, oy) && !out[y * w + x])
-					out[y * w + x] = s;
+					out[y * w + x] = val;
 			}
-		s++;
+		if (novel)
+			s++;
 	}
 }
 

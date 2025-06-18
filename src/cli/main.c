@@ -14,6 +14,7 @@ int save_img(const char* name, const struct grid* grid, uint w, uint h) {
 		for (uint y = 0; y < (uint) h; y++)
 			out[y * w + x] = 255 * ((float) grid_get(grid, x, y) / m);
 	stbi_write_png(name, w, h, 1, out, w * sizeof(unsigned char));
+	printf("%d\n", grid_max(grid));
 }
 
 int main(int argc, char** argv) {
