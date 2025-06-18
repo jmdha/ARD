@@ -4,8 +4,8 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
-#include "lib/grid.h"
-#include "lib/layer.h"
+#include "grid.h"
+#include "layer.h"
 
 int save_img(const char* name, const struct grid* grid, uint w, uint h) {
 	unsigned char* out = calloc(w * h, sizeof(unsigned char));
