@@ -122,7 +122,3 @@ void sect(uint* out, const uint* buf, uint w, uint h) {
 	sect_gen(out, cors, c, w, h);
 	free(cors);
 }
-
-void room(uint* out, const uint* buf, uint w, uint h) {
-
-}
