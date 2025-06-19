@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "misc.h"
 #include "grid.h"
 
 struct grid {
@@ -55,8 +54,10 @@ uint grid_max(const struct grid* grid) {
 
 void grid_resize(struct grid *grid, int w, int h) {
 	uint* tmp = calloc(w * h, sizeof(uint));
-	for (int x = 0; x < min(grid->width, w); x++)
-		for (int y = 0; y < min(grid->height, h); y++)
+	const uint min_width  = grid->width > w ? w : grid_width;
+	const uint min_height = grid->height > h ? h : grid_height;
+	for (int x = 0; x < min_width; x++)
+		for (int y = 0; y < min_height; y++)
 			tmp[y * w + x] = grid->buffer[y * grid->width + x];
 	free(grid->buffer);
 	grid->buffer = tmp;

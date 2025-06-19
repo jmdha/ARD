@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "misc.h"
-
 // ABC
 struct grid;
 

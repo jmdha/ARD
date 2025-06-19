@@ -1,7 +1,5 @@
 #pragma once
 
-#include "misc.h"
-
 uint pval(const uint* buf, uint w, uint h, uint x, uint y);
 
 // Calculates the proximity values for each cell in the grid.
