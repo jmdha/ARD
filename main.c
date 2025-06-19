@@ -6,7 +6,10 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
-uint max(const uint* buf, uint w, uint h) {
+#define max(x,y) (((x) >= (y)) ? (x) : (y))
+#define min(x,y) (((x) <= (y)) ? (x) : (y))
+
+uint gmax(const uint* buf, uint w, uint h) {
 	uint m = 0;
 	for (uint x = 0; x < w; x++)
 		for (uint y = 0; y < h; y++)
@@ -15,54 +18,34 @@ uint max(const uint* buf, uint w, uint h) {
 	return m;
 }
 
-bool in(uint w, uint h, uint x, uint y, int ox, int oy) {
-	if (ox > 0 && x + ox >= w)
-		return false;
-	if (oy > 0 && y + oy >= h)
-		return false;
-	if (ox < 0 && (uint) abs(ox) > x)
-		return false;
-	if (oy < 0 && (uint) abs(oy) > y)
-		return false;
-	return true;
-}
-
-bool phit(const uint* buf, uint w, uint h, uint x0, uint y0, uint i) {
-	for (int mx = -1; mx <= 1; mx++) {
-		for (int my = -1; my <= 1; my++) {
-			const int ox = mx * i;
-			const int oy = my * i;
-			if (!in(w, h, x0, y0, ox, oy))
+bool phit(const uint* buf, int w, int h, int x, int y, int i) {
+	if (x + i >= w || x - i < 0 || y + i >= h || y - i < 0)
+		return true;
+	for (int mx = -1; mx <= 1; mx++)
+		for (int my = -1; my <= 1; my++)
+			if (!buf[(y + my * i) * w + (x + mx * i)])
 				return true;
-			const uint x = x0 + ox;
-			const uint y = y0 + oy;
-			if (buf[y * w + x] == 0)
-				return true;
-		}
-	}
 	return false;
 }
 
-uint pval(const uint* buf, uint w, uint h, uint x, uint y) {
-	for (uint i = 1; i < ~(uint)0; i++)
+uint pval(const uint* buf, int w, int h, int x, int y) {
+	for (int i = 1; i < INT_MAX; i++)
 		if (phit(buf, w, h, x, y, i))
 			return i;
 	__builtin_unreachable();
 }
 
-void prox(uint* out, const uint* buf, uint w, uint h) {
-	for (uint x = 0; x < w; x++)
-		for (uint y = 0; y < h; y++)
-			if (buf[y * w + x] == 0)
-				out[y * w + x] = 0;
-			else
+void prox(uint* out, const uint* buf, int w, int h) {
+	for (int x = 0; x < w; x++)
+		for (int y = 0; y < h; y++)
+			if (buf[y * w + x])
 				out[y * w + x] = pval(buf, w, h, x, y);
 }
 
 struct cor {
-	uint x;
-	uint y;
-	uint v;
+	int x;
+	int y;
+	int v;
 };
 
 // For sorting biggest first
@@ -76,10 +59,10 @@ int cor_comp(const void* a, const void* b) {
 }
 
 // Counts the number of non-zero values
-uint set_count(const uint* buf, uint w, uint h) {
+uint set_count(const uint* buf, int w, int h) {
 	uint v = 0;
-	for (uint x = 0; x < w; x++)
-		for (uint y = 0; y < h; y++)
+	for (int x = 0; x < w; x++)
+		for (int y = 0; y < h; y++)
 			if (buf[y * w + x] != 0)
 				v++;
 	return v;
@@ -102,20 +85,17 @@ uint grid_vals(struct cor** cors, const uint* buf, uint w, uint h) {
 }
 
 // Splits the grid into sectors
-void sect_gen(uint* out, const struct cor* cors, uint c, uint w, uint h) {
+void sect_gen(uint* out, const struct cor* cors, int c, int w, int h) {
 	memset(out, 0, w * h * sizeof(uint));
-	uint s = 1;
-	for (uint i = 0; i < c; i++) {
+	int s = 1;
+	for (int i = 0; i < c; i++) {
 		const struct cor* cor = &cors[i];
 		const bool novel = out[cor->y * w + cor->x] == 0;
-		const uint val = novel ? s : out[cor->y * w + cor->x];
-		for (int ox = -((int)cor->v); ox <= (int) cor->v; ox++)
-			for (int oy = -((int)cor->v); oy <= (int) cor->v; oy++) {
-				const uint x = cor->x + ox;
-				const uint y = cor->y + oy;
-				if (in(w, h, cor->x, cor->y, ox, oy) && !out[y * w + x])
+		const int val = novel ? s : out[cor->y * w + cor->x];
+		for (int x = max(cor->x - cor->v, 0); x <= min(cor->x + cor->v, w); x++)
+			for (int y = max(cor->y - cor->v, 0); y <= min(cor->y + cor->v, h); y++)
+				if (!out[y * w + x])
 					out[y * w + x] = val;
-			}
 		if (novel)
 			s++;
 	}
@@ -132,7 +112,7 @@ void sect(uint* out, const uint* buf, uint w, uint h) {
 
 int save_img(const char* name, const uint* buf, uint w, uint h) {
 	unsigned char* out = calloc(w * h, sizeof(unsigned char));
-	uint m = max(buf, w, h);
+	uint m = gmax(buf, w, h);
 	for (uint x = 0; x < (uint) w; x++)
 		for (uint y = 0; y < (uint) h; y++)
 			out[y * w + x] = 255 * ((float) buf[y * w + x] / m);
