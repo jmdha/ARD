@@ -3,6 +3,7 @@
 
 #include <stb_image.h>
 #include <stb_image_write.h>
+#include <sys/types.h>
 
 #include "grid.h"
 #include "layer.h"
