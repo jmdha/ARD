@@ -57,18 +57,8 @@ int cor_comp(const void* a, const void* b) {
 		return 0;
 }
 
-uint set_count(const uint* buf, int w, int h) {
-	uint v = 0;
-	for (int x = 0; x < w; x++)
-		for (int y = 0; y < h; y++)
-			if (buf[y * w + x] != 0)
-				v++;
-	return v;
-}
-
 uint grid_vals(struct cor** cors, const uint* buf, uint w, uint h) {
-	const uint c = set_count(buf, w, h);
-	*cors = malloc(c * sizeof(struct cor));
+	*cors = malloc(w * h * sizeof(struct cor));
 	uint i = 0;
 	for (uint x = 0; x < w; x++)
 		for (uint y = 0; y < h; y++)
@@ -78,7 +68,8 @@ uint grid_vals(struct cor** cors, const uint* buf, uint w, uint h) {
 				(*cors)[i].v = buf[y * w + x];
 				i++;
 			}
-	return c;
+	*cors = realloc(*cors, i * sizeof(struct cor));
+	return i;
 }
 
 void sect_gen(uint* out, const struct cor* cors, int c, int w, int h) {
@@ -86,7 +77,7 @@ void sect_gen(uint* out, const struct cor* cors, int c, int w, int h) {
 	int s = 1;
 	for (int i = 0; i < c; i++) {
 		const struct cor* cor = &cors[i];
-		const bool novel = out[cor->y * w + cor->x] == 0;
+		const bool novel = !out[cor->y * w + cor->x];
 		const int val = novel ? s : out[cor->y * w + cor->x];
 		for (int x = max(cor->x - cor->v, 0); x <= min(cor->x + cor->v, w); x++)
 			for (int y = max(cor->y - cor->v, 0); y <= min(cor->y + cor->v, h); y++)
