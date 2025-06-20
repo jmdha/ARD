@@ -18,19 +18,18 @@ int gmax(const int* buf, int w, int h) {
 	return m;
 }
 
-int pval(const int* buf, int w, int h, int x, int y) {
-	for (int i = 0; i < min(abs(w - x), abs(h - y)); i++)
-		if (!buf[(y + i) * w + (x + i)] ||
-		    !buf[(y + i) * w + (x - i)] ||
-		    !buf[(y - i) * w + (x + i)] ||
-		    !buf[(y - i) * w + (x - i)])
-			return i;
-	return min(abs(w - x), abs(h - y));
-}
-
 void prox(int* out, const int* buf, int w, int h) {
-	gloop(w, h)
-		out[y * w + x] = pval(buf, w, h, x, y);
+	gloop(w, h) {
+		int i = 0;
+		do {
+			if (!buf[(y + i) * w + (x + i)] ||
+			    !buf[(y + i) * w + (x - i)] ||
+			    !buf[(y - i) * w + (x + i)] ||
+			    !buf[(y - i) * w + (x - i)])
+				break;
+		} while (++i < min(abs(w - x), abs(h - y)));
+		out[y * w + x] = i;
+	}
 }
 
 struct cor {
