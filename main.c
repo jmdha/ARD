@@ -18,7 +18,7 @@ uint gmax(const uint* buf, int w, int h) {
 }
 
 uint pval(const uint* buf, int w, int h, int x, int y) {
-	for (int i = 1; i < min(abs(w - x), abs(h - y)); i++)
+	for (int i = 0; i < min(abs(w - x), abs(h - y)); i++)
 		if (!buf[(y + i) * w + (x + i)] ||
 		    !buf[(y + i) * w + (x - i)] ||
 		    !buf[(y - i) * w + (x + i)] ||
@@ -30,8 +30,7 @@ uint pval(const uint* buf, int w, int h, int x, int y) {
 void prox(uint* out, const uint* buf, int w, int h) {
 	for (int x = 0; x < w; x++)
 		for (int y = 0; y < h; y++)
-			if (buf[y * w + x])
-				out[y * w + x] = pval(buf, w, h, x, y);
+			out[y * w + x] = pval(buf, w, h, x, y);
 }
 
 struct cor {
