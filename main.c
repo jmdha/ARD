@@ -114,11 +114,9 @@ int main(int, char** argv) {
 		printf("Failed to load file\n");
 		return 1;
 	}
-	uint* buf = calloc(w * h, sizeof(uint));
-	for (uint x = 0; x < (uint) w; x++)
-		for (uint y = 0; y < (uint) h; y++)
-			if (img_buf[y * w + x])
-				buf[y * w + x] = 1;
+	uint* buf = malloc(w * h * sizeof(uint));
+	for (int i = 0; i < w * h; i++)
+		buf[i] = img_buf[i];
 	prox(buf, buf, w, h);
 	save_img("prox.png", buf, w, h);
 	sect(buf, buf, w, h);
