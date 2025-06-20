@@ -9,30 +9,30 @@
 #define max(x,y) (((x) >= (y)) ? (x) : (y))
 #define min(x,y) (((x) <= (y)) ? (x) : (y))
 
-uint gmax(const uint* buf, uint w, uint h) {
-	uint m = 0;
-	for (uint x = 0; x < w; x++)
-		for (uint y = 0; y < h; y++)
-			if (buf[y * w + x] > m)
-				m = buf[y * w + x];
+uint gmax(const uint* buf, int w, int h) {
+	int m = 0;
+	for (int x = 0; x < w; x++)
+		for (int y = 0; y < h; y++)
+			m = max(m, buf[y * w + x]);
 	return m;
 }
 
-bool phit(const uint* buf, int w, int h, int x, int y, int i) {
-	if (x + i >= w || x - i < 0 || y + i >= h || y - i < 0)
-		return true;
-	for (int mx = -1; mx <= 1; mx++)
-		for (int my = -1; my <= 1; my++)
-			if (!buf[(y + my * i) * w + (x + mx * i)])
-				return true;
+bool phit(const uint* buf, int w, int x0, int y0, int i) {
+	for (int x = x0 - i; x < x0 + i; x++)
+		if (!buf[(y0 + i) * w + x] || !buf[(y0 - i) * w + x])
+			return true;
+	for (int y = y0 - i; y < y0 + i; y++)
+		if (!buf[y * w + (x0 + i)] || !buf[y * w + (x0 - i)])
+			return true;
 	return false;
 }
 
 uint pval(const uint* buf, int w, int h, int x, int y) {
-	for (int i = 1; i < INT_MAX; i++)
-		if (phit(buf, w, h, x, y, i))
+	const int m = min(abs(w - x), abs(h - y));
+	for (int i = 1; i < m; i++)
+		if (phit(buf, w, x, y, i))
 			return i;
-	__builtin_unreachable();
+	return m;
 }
 
 void prox(uint* out, const uint* buf, int w, int h) {
@@ -113,13 +113,14 @@ void sect(uint* out, const uint* buf, uint w, uint h) {
 int save_img(const char* name, const uint* buf, uint w, uint h) {
 	unsigned char* out = calloc(w * h, sizeof(unsigned char));
 	uint m = gmax(buf, w, h);
+	printf("%d\n", m);
 	for (uint x = 0; x < (uint) w; x++)
 		for (uint y = 0; y < (uint) h; y++)
 			out[y * w + x] = 255 * ((float) buf[y * w + x] / m);
 	return stbi_write_png(name, w, h, 1, out, w * sizeof(unsigned char));
 }
 
-int main(int argc, char** argv) {
+int main(int, char** argv) {
 	stbi_write_png_compression_level = 0;
 	int w, h, n;
 	unsigned char* img_buf = stbi_load(argv[1], &w, &h, &n, 1);
