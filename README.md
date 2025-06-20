@@ -13,4 +13,8 @@ Uses [stb](https://github.com/nothings/stb) image library, which is included, ho
 git clone https://github.com/jmdha/ARD.git && \
 cd ARD && \
 gcc -o3 -o ARD main.c -lm
-``
+```
+The program will be called ARD, which only requires the path to a png to create images.
+
+## Algorithm
+TBD
