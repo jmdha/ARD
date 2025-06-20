@@ -48,7 +48,6 @@ struct cor {
 	int v;
 };
 
-// For sorting biggest first
 int cor_comp(const void* a, const void* b) {
 	if (((struct cor*)a)->v > ((struct cor*)b)->v)
 		return -1;
@@ -58,7 +57,6 @@ int cor_comp(const void* a, const void* b) {
 		return 0;
 }
 
-// Counts the number of non-zero values
 uint set_count(const uint* buf, int w, int h) {
 	uint v = 0;
 	for (int x = 0; x < w; x++)
@@ -68,7 +66,6 @@ uint set_count(const uint* buf, int w, int h) {
 	return v;
 }
 
-// Finds the value of each non-zero coordinate
 uint grid_vals(struct cor** cors, const uint* buf, uint w, uint h) {
 	const uint c = set_count(buf, w, h);
 	*cors = malloc(c * sizeof(struct cor));
@@ -84,7 +81,6 @@ uint grid_vals(struct cor** cors, const uint* buf, uint w, uint h) {
 	return c;
 }
 
-// Splits the grid into sectors
 void sect_gen(uint* out, const struct cor* cors, int c, int w, int h) {
 	memset(out, 0, w * h * sizeof(uint));
 	int s = 1;
@@ -101,7 +97,6 @@ void sect_gen(uint* out, const struct cor* cors, int c, int w, int h) {
 	}
 }
 
-// Splits the grid into sectors
 void sect(uint* out, const uint* buf, uint w, uint h) {
 	struct cor* cors;
 	const uint c = grid_vals(&cors, buf, w, h);
