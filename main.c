@@ -17,22 +17,14 @@ uint gmax(const uint* buf, int w, int h) {
 	return m;
 }
 
-bool phit(const uint* buf, int w, int x0, int y0, int i) {
-	for (int x = x0 - i; x < x0 + i; x++)
-		if (!buf[(y0 + i) * w + x] || !buf[(y0 - i) * w + x])
-			return true;
-	for (int y = y0 - i; y < y0 + i; y++)
-		if (!buf[y * w + (x0 + i)] || !buf[y * w + (x0 - i)])
-			return true;
-	return false;
-}
-
 uint pval(const uint* buf, int w, int h, int x, int y) {
-	const int m = min(abs(w - x), abs(h - y));
-	for (int i = 1; i < m; i++)
-		if (phit(buf, w, x, y, i))
+	for (int i = 1; i < min(abs(w - x), abs(h - y)); i++)
+		if (!buf[(y + i) * w + (x + i)] ||
+		    !buf[(y + i) * w + (x - i)] ||
+		    !buf[(y - i) * w + (x + i)] ||
+		    !buf[(y - i) * w + (x - i)])
 			return i;
-	return m;
+	return min(abs(w - x), abs(h - y));
 }
 
 void prox(uint* out, const uint* buf, int w, int h) {
